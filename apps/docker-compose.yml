@@ -1,0 +1,139 @@
+version: '3.8'
+
+services:
+  # MongoDB Database Service
+  mongodb:
+    image: mongo:6.0
+    container_name: bestcity-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-changeme}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-bestcity}
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    networks:
+      - bestcity-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  # Backend API Service
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: bestcity-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3099
+      MONGO_URI: mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/${MONGO_DATABASE:-bestcity}?authSource=admin
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      JWT_EXPIRE: ${JWT_EXPIRE:-7d}
+      COOKIE_EXPIRE: ${COOKIE_EXPIRE:-5}
+      CLOUDINARY_NAME: ${CLOUDINARY_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+      SENDGRID_MAIL: ${SENDGRID_MAIL}
+      SENDGRID_RESET_TEMPLATEID: ${SENDGRID_RESET_TEMPLATEID}
+      SENDGRID_ORDER_TEMPLATEID: ${SENDGRID_ORDER_TEMPLATEID}
+      PAYTM_MID: ${PAYTM_MID}
+      PAYTM_MERCHANT_KEY: ${PAYTM_MERCHANT_KEY}
+      PAYTM_WEBSITE: ${PAYTM_WEBSITE:-WEBSTAGING}
+      PAYTM_CHANNEL_ID: ${PAYTM_CHANNEL_ID:-WEB}
+      PAYTM_INDUSTRY_TYPE: ${PAYTM_INDUSTRY_TYPE:-Retail}
+      PAYTM_CUST_ID: ${PAYTM_CUST_ID}
+    ports:
+      - "${BACKEND_PORT:-3099}:3099"
+    volumes:
+      - ./server/data:/app/server/data
+      - ./server/config/config.env:/app/server/config/config.env:ro
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - bestcity-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3099/', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend Service (Optional - if using separate frontend container)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: bestcity-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      - backend
+    networks:
+      - bestcity-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Alternative: Combined Backend + Frontend Service
+  # Uncomment this and comment out frontend/backend above if you want a single container
+  # app:
+  #   build:
+  #     context: ..
+  #     dockerfile: infra/Dockerfile
+  #   container_name: bestcity-app
+  #   restart: unless-stopped
+  #   environment:
+  #     NODE_ENV: production
+  #     PORT: 3099
+  #     MONGO_URI: mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/${MONGO_DATABASE:-bestcity}?authSource=admin
+  #     JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+  #     JWT_EXPIRE: ${JWT_EXPIRE:-7d}
+  #     COOKIE_EXPIRE: ${COOKIE_EXPIRE:-5}
+  #     CLOUDINARY_NAME: ${CLOUDINARY_NAME}
+  #     CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+  #     CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+  #     SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+  #     SENDGRID_MAIL: ${SENDGRID_MAIL}
+  #     SENDGRID_RESET_TEMPLATEID: ${SENDGRID_RESET_TEMPLATEID}
+  #     SENDGRID_ORDER_TEMPLATEID: ${SENDGRID_ORDER_TEMPLATEID}
+  #     PAYTM_MID: ${PAYTM_MID}
+  #     PAYTM_MERCHANT_KEY: ${PAYTM_MERCHANT_KEY}
+  #     PAYTM_WEBSITE: ${PAYTM_WEBSITE:-WEBSTAGING}
+  #     PAYTM_CHANNEL_ID: ${PAYTM_CHANNEL_ID:-WEB}
+  #     PAYTM_INDUSTRY_TYPE: ${PAYTM_INDUSTRY_TYPE:-Retail}
+  #     PAYTM_CUST_ID: ${PAYTM_CUST_ID}
+  #   ports:
+  #     - "${APP_PORT:-3099}:3099"
+  #   volumes:
+  #     - ./server/data:/app/server/data
+  #     - ./server/config/config.env:/app/server/config/config.env:ro
+  #   depends_on:
+  #     mongodb:
+  #       condition: service_healthy
+  #   networks:
+  #     - bestcity-network
+
+volumes:
+  mongodb_data:
+    driver: local
+  mongodb_config:
+    driver: local
+
+networks:
+  bestcity-network:
+    driver: bridge
+
