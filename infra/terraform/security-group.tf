@@ -12,21 +12,21 @@ module "public_security_group" {
       from_port   = 0
       to_port     = 65535
       protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
+      cidr_blocks = "0.0.0.0/0"
       description = "Allow all TCP traffic from public"
     },
     {
       from_port   = 0
       to_port     = 65535
       protocol    = "udp"
-      cidr_blocks = ["0.0.0.0/0"]
+      cidr_blocks = "0.0.0.0/0"
       description = "Allow all UDP traffic from public"
     },
     {
       from_port   = -1
       to_port     = -1
       protocol    = "icmp"
-      cidr_blocks = ["0.0.0.0/0"]
+      cidr_blocks = "0.0.0.0/0"
       description = "Allow ICMP traffic from public"
     }
   ]
@@ -36,7 +36,7 @@ module "public_security_group" {
       from_port   = 0
       to_port     = 0
       protocol    = "-1"
-      cidr_blocks = ["0.0.0.0/0"]
+      cidr_blocks = "0.0.0.0/0"
       description = "Allow all outbound traffic"
     }
   ]
@@ -84,7 +84,7 @@ module "private_security_group" {
       from_port   = 0
       to_port     = 0
       protocol    = "-1"
-      cidr_blocks = ["0.0.0.0/0"]
+      cidr_blocks = "0.0.0.0/0"
       description = "Allow all outbound traffic"
     }
   ]
