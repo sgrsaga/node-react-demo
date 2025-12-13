@@ -1,14 +1,14 @@
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 5.0"
+  version = "~> 6.5.1"
 
-  name = "${var.cluster_name}-vpc"
+  name = var.vpc_name
   cidr = var.vpc_cidr
 
-  azs = ["${var.aws_region}a", "${var.aws_region}b", "${var.aws_region}c"]
+  azs             = ["${var.aws_region}a", "${var.aws_region}b", "${var.aws_region}c"]
   private_subnets = var.private_subnets_cidr
   public_subnets  = var.public_subnets_cidr
-  
+
   public_subnet_tags = {
     "apps/external" = "true"
   }

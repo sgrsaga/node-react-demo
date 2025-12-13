@@ -1,4 +1,9 @@
 ##### AWS VPC variables #####
+variable "vpc_name" {
+  type        = string
+  default     = "node-react-vpc"
+  description = "VPC Name"
+}
 
 variable "vpc_cidr" {
   type        = string
