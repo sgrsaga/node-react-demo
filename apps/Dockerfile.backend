@@ -10,8 +10,8 @@ RUN apk add --no-cache python3 make g++
 # Copy package files
 COPY package*.json ./
 
-# Install all dependencies
-RUN npm ci && npm cache clean --force
+# Install all dependencies (skip prepare script to avoid starting the app)
+RUN npm ci --ignore-scripts && npm cache clean --force
 
 # Stage 2: Production runtime environment
 FROM node:18-alpine AS production
@@ -32,7 +32,7 @@ COPY package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 
 # Copy backend source code
-COPY ../server ./server
+COPY server ./server
 
 # Create necessary directories
 RUN mkdir -p server/data/images server/data/invoice && \

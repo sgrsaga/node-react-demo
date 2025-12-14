@@ -7,8 +7,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install all dependencies (including devDependencies for build)
-RUN npm ci && npm cache clean --force
+# Install all dependencies (skip prepare script to avoid starting the app)
+RUN npm ci --ignore-scripts && npm cache clean --force
 
 # Copy frontend source files
 COPY public ./public
