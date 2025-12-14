@@ -23,8 +23,28 @@ variable "public_subnets_cidr" {
   description = "Public subnets CIDR"
 }
 
-variable "private_subnets_cidr" {
+
+##### EC2 variables #####
+variable "instance_type" {
+  type        = string
+  default     = "t2.xlarge"
+  description = "EC2 instance type"
+}
+
+variable "key_name" {
+  type        = string
+  default     = "mumbai"
+  description = "AWS Key Pair name for EC2 instances"
+}
+
+variable "ami_id" {
+  type        = string
+  default     = "ami-02b8269d5e85954ef"
+  description = "AWS AMI ID for EC2 instances"
+}
+
+variable "ec2_instance_names" {
   type        = list(string)
-  default     = ["10.0.1.0/24"]
-  description = "Private subnets CIDR"
+  default     = ["node-react-apps-1", "node-react-monitoring-1"]
+  description = "EC2 instance name"
 }
