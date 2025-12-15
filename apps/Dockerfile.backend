@@ -35,8 +35,8 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY server ./server
 
 # Create necessary directories
-RUN mkdir -p server/data/images server/data/invoice && \
-    chown -R nodejs:nodejs /app
+# RUN mkdir -p server/data/images server/data/invoice && \
+#     chown -R nodejs:nodejs /app
 
 # Switch to non-root user
 USER nodejs
