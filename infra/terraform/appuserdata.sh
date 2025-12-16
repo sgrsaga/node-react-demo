@@ -31,9 +31,11 @@ docker run -d --name=node-exporter -p 9100:9100 prom/node-exporter
 ## Setup fluentd package 6
 #curl -fsSL https://fluentd.cdn.cncf.io/sh/install-ubuntu-noble-fluent-package6-lts.sh | sh
 docker run -d --name=fluentd -p 24224:24224 -p 24224:24224/udp \
+--add-host 10e20d218886:13.234.231.159 \
 -v /data:/fluentd/log \
 -v /data/fluentd/etc/fluent.conf:/fluentd/etc/fluent.conf:rw \
 -v /data/fluentd/plugins:/fluentd/plugins \
--v /data/fluentd/certs:/fluentd/certs \
+-v /data/fluentd/certs/http_ca.crt:/fluentd/certs/http_ca.crt:ro \
+-v /var/log/fluentd:/var/log:rw \
 -v /var/logs:/var/logs:rw \
-fluent/fluentd:edge-debian
+fluent:v1

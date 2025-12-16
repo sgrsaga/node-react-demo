@@ -56,7 +56,9 @@ docker run -d --rm --name=node-exporter -p 9100:9100 prom/node-exporter
 
 ## setup elastic search
 docker network create elastic
-docker run --name es01 --net elastic -p 9200:9200 -it -m 1GB docker.elastic.co/elasticsearch/elasticsearch:9.2.2
+docker run --name es01 --net elastic -p 9200:9200 -it -m 5GB \
+-v /data/elasticsearch/ref:/ref:rw \
+docker.elastic.co/elasticsearch/elasticsearch:9.2.2
 
 ## generate tokens
 #docker exec -it es01 /usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic
